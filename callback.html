@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>Tesla Login abgeschlossen</title>
+<style>
+  body { font-family: -apple-system, system-ui, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 16px; color: #222; }
+  h1 { font-size: 1.5em; }
+  #code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 1.4em; word-break: break-all; background: #f3f3f3; border: 1px solid #ccc; border-radius: 8px; padding: 16px; margin: 16px 0; user-select: all; }
+  button { font-size: 1.1em; padding: 10px 20px; border-radius: 8px; border: 1px solid #888; background: #fff; cursor: pointer; }
+  .error { color: #b00020; background: #fdecee; border: 1px solid #f5c2c7; border-radius: 8px; padding: 12px; }
+  .hidden { display: none; }
+  small { color: #666; }
+</style>
+</head>
+<body>
+<h1>Tesla Login abgeschlossen</h1>
+<div id="error" class="error hidden"></div>
+<div id="ok" class="hidden">
+  <p>Kopiere diesen Code und füge ihn im Chat in das verdeckte Eingabefeld ein. Er ist nur wenige Minuten gültig.</p>
+  <div id="code"></div>
+  <button id="copy" type="button">Code kopieren</button>
+  <span id="copied" class="hidden">Kopiert!</span>
+  <p><small>State: <span id="state"></span></small></p>
+</div>
+<div id="none" class="hidden"><p>Kein Code in der Adresse gefunden.</p></div>
+<script>
+(function () {
+  var p = new URLSearchParams(window.location.search);
+  var code = p.get('code'), state = p.get('state'), err = p.get('error');
+  var desc = p.get('error_description');
+  if (err) {
+    var e = document.getElementById('error');
+    e.textContent = 'Fehler: ' + err + (desc ? ' (' + desc + ')' : '');
+    e.classList.remove('hidden');
+  }
+  if (code) {
+    document.getElementById('code').textContent = code;
+    document.getElementById('state').textContent = state || '';
+    document.getElementById('ok').classList.remove('hidden');
+    document.getElementById('copy').addEventListener('click', function () {
+      var done = function () { document.getElementById('copied').classList.remove('hidden'); };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(code).then(done, function () { fallback(); });
+      } else { fallback(); }
+      function fallback() {
+        var r = document.createRange(); r.selectNodeContents(document.getElementById('code'));
+        var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+        try { document.execCommand('copy'); done(); } catch (x) {}
+      }
+    });
+  } else if (!err) {
+    document.getElementById('none').classList.remove('hidden');
+  }
+})();
+</script>
+</body>
+</html>
